@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fortune Teller 🔮</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive;
+      text-align: center;
+      padding: 0;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background-color: #f0f8ff;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .container {
+      width: 80%;
+      max-width: 400px;
+      padding: 20px;
+      border: 2px solid #ccc;
+      border-radius: 20px;
+      background-color: white;
+      box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+      margin: auto;
+      position: relative;
+      top: 0;
+    }
+
+    h1 {
+      color: #28a745;
+      font-family: 'Cursive';
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+
+    h1 small {
+      display: block;
+      font-size: 14px;
+      color: black;
+    }
+
+    input, select {
+      padding: 8px;
+      width: 70%;
+      margin: 10px auto;
+      font-size: 14px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+      display: block;
+    }
+
+    button {
+      padding: 8px 12px;
+      background-color: #6200ea;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      border-radius: 10px;
+      margin: 10px auto;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #4500b5;
+      transform: scale(1.05);
+    }
+
+    #copyFortune {
+      font-size: 12px;
+      padding: 4px 10px;
+    }
+
+    #animation, #fortuneDisplay, .progress-container {
+      margin: 20px 0;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .crystal-ball {
+      position: relative;
+      margin: 20px auto;
+      width: 80px;
+      height: 80px;
+      background-color: #87ceeb;
+      border-radius: 50%;
+      animation: spin 3s linear infinite;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.7);
+    }
+
+    .crystal-ball::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(255,255,255,0.3), rgba(255,255,255,0.0));
+      border-radius: 50%;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    .progress-container {
+      width: 100%;
+      background-color: #e0e0e0;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+
+    .progress-bar {
+      height: 10px;
+      background-color: #6200ea;
+      width: 0%;
+      border-radius: 10px;
+      transition: width 5s ease-in-out;
+    }
+
+    #fortuneDisplay {
+      opacity: 0;
+      transition: opacity 1s ease-in;
+    }
+
+    #fortuneDisplay.show {
+      opacity: 1;
+    }
+
+    .error-message {
+      color: red;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .dotted-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(0, 0, 0, 0.1) 20%, transparent 20%),
+                  radial-gradient(circle, rgba(0, 0, 0, 0.1) 20%, transparent 20%),
+                  radial-gradient(circle, rgba(0, 0, 0, 0.1) 20%, transparent 20%);
+      background-size: 50px 50px;
+      animation: move 3s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes move {
+      0% { background-position: 0 0; }
+      100% { background-position: 100% 100%; }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes glow {
+      0% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.7); }
+      100% { box-shadow: 0 0 40px rgba(255, 255, 255, 1); }
+    }
+
+    @media (max-width: 600px) {
+      input, select {
+        width: 100%;
+        font-size: 14px;
+      }
+
+      button {
+        font-size: 14px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+    }
+
+    .fortune-text {
+      font-weight: bold; 
+      font-size: 16px; 
+      color: #333; 
+      margin: 10px 0;
+    }
+
+    .colorful-text {
+      color: #6200ea; 
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="dotted-bg"></div>
+  <div class="container">
+    <h1>🔮 Fortune Teller 🔮<br><small>By @tyagixd</small></h1>
+    <p>Enter the first letter of your name❤️, a number between 1 and 10🔢, and select a language🅰️🕉️!</p>
+
+    <input type="text" id="firstLetterInput" placeholder="First Letter of Your Name" maxlength="1">
+    <input type="number" id="numberInput" placeholder="Number (1-10)" min="1" max="10">
+
+    <select id="languageSelect">
+      <option value="">Select Language</option>
+      <option value="en">English</option>
+      <option value="hi">Hindi</option>
+    </select>
+
+    <div id="topicSelection" class="hidden">
+      <select id="topicOne">
+        <option value="">Select Topic 1</option>
+        <option value="Career and Finances">Career and Finances</option>
+        <option value="Love and Relationships">Love and Relationships</option>
+        <option value="Health and Wellness">Health and Wellness</option>
+        <option value="Home and Family">Home and Family</option>
+        <option value="Travel and Adventure">Travel and Adventure</option>
+      </select>
+
+      <select id="topicTwo">
+        <option value="">Select Topic 2</option>
+        <option value="Spirituality and Growth">Spirituality and Growth</option>
+        <option value="Education and Learning">Education and Learning</option>
+        <option value="Creativity and Expression">Creativity and Expression</option>
+        <option value="Friendships and Connections">Friendships and Connections</option>
+        <option value="Personal Development and Goals">Personal Development and Goals</option>
+      </select>
+    </div>
+
+    <div id="errorMessage" class="error-message hidden">Kya kar rhe ho yrrr!🤡</div>
+
+    <br>
+
+    <button id="fortuneBtn">✨Tell My Fortune 🔯</button>
+
+    <div id="animation" class="hidden">
+      <p id="suspenseText" class="suspense-text">🧙‍♂️ Reading the stars... ✨</p>
+      <div class="crystal-ball"></div>
+      <div class="progress-container">
+        <div class="progress-bar"></div>
+      </div>
+    </div>
+
+    <div id="fortuneDisplay" class="hidden">
+      <p id="fortuneText" class="fortune-text"></p>
+      <button id="copyFortune">Copy My Fortune 📋</button>
+    </div>
+  </div>
+
+  <script>
+    const firstLetterInput = document.getElementById("firstLetterInput");
+    const languageSelect = document.getElementById("languageSelect");
+    const fortuneBtn = document.getElementById("fortuneBtn");
+    const fortuneText = document.getElementById("fortuneText");
+    const progressBar = document.querySelector(".progress-bar");
+    const errorMessage = document.getElementById("errorMessage");
+    const topicSelection = document.getElementById("topicSelection");
+    const topicOne = document.getElementById("topicOne");
+    const topicTwo = document.getElementById("topicTwo");
+
+    const progressBarDuration = 7000; // Duration for progress bar
+    const suspenseDuration = 900; // Duration for suspense message change
+    const fortuneDisplayDelay = 1000; // Delay before showing the fortune
+
+    const fortunes = {
+      "Career and Finances": [
+        "A new job opportunity is coming your way, but it will require stepping outside of your comfort zone. 💼",
+        "Your financial situation is improving, but be mindful of your spending habits. 💰",
+        "Unexpected expenses could arise, so plan accordingly. 📉",
+        "Networking will open new doors for you, don't hesitate to connect. 🤝",
+		"A promotion or raise is in your future, but continue to work hard and demonstrate your skills. 📈",
+		"A challenging project is coming your way, but it will be a valuable learning experience. 📚",
+		"Your career path is evolving, be open to new opportunities. 🔄",
+		"A financial windfall is on the horizon, but be prepared to manage it wisely. 🌟",
+		"A change in your career direction is coming, but it will lead to greater fulfillment. ✨",
+		"Your financial stability is improving, but don't become complacent. ⚖️",
+		"A new business venture is a possibility, but do your research before taking the leap. 🚀",
+		"A mentor or guide is entering your professional life, be open to their advice. 🧑‍🏫",
+		"You have a hidden talent that will soon be revealed. 🎨",
+		"Learning a new skill will boost your career. 📖",
+		"Your teamwork skills will lead you to success. 👥",
+		"An important project will be assigned to you that will advance your career. 📋",
+		"You will demonstrate your expertise in a new field. 🌐",
+		"You will receive an award or recognition that will boost your career. 🏆",
+		"You will consider starting a new business. 🏢",
+		"You will give a successful presentation that will advance your career. 🎤",
+		"You will get a new opportunity that will change your career. 🔑",
+		"You will learn a new skill that will be useful in your career. 🛠️",
+		"You will take on a leadership role and succeed. 🥇",
+		"You will enter a new industry and succeed. 🏭",
+		"You will have the opportunity to work for an international company. 🌍",
+		"You will develop a new product or service that will be successful. 💡",
+		"You can take a new turn in your career that will bring you satisfaction. 🔄"
+	  ],
+      "Love and Relationships": [
+		"A new love is coming into your life, but be open to unexpected connections. ❤️",
+		"Your current relationship is deepening, but communication is key. 💬",
+		"Friendship could blossom into romance if you’re willing to explore it. 🌹",
+		"A surprise gesture will strengthen your bond with a loved one. 🎁",
+		"You will start a new chapter in your relationship. 📖",
+		"You will fall in love with an old friend. 🥰",
+		"You will meet your soulmate. 💞",
+		"You will go on a memorable vacation with your family. 🌴",
+		"You will welcome a new baby into your family. 👶",
+		"You will spend more quality time with your partner. ❤️‍🔥",
+		"You will take steps to strengthen your relationship. 🔗",
+		"You will form a strong bond with your friends. 🤗",
+		"You will meet a new friend who will become very important in your life. 🌟",
+		"You will feel more trust and security in your relationship. 🔒",
+		"You will go on a romantic trip with your loved one. ✈️",
+		"You will celebrate a traditional festival with your family. 🎉"
+	  ],
+	  "Health and Wellness": [
+		"A new fitness routine will bring you joy and energy. 🏋️‍♀️",
+		"Pay attention to your mental health; taking breaks is essential. 🧘‍♂️",
+		"Healthy eating habits will lead to a boost in your mood. 🍎",
+		"You may discover a new passion for wellness or self-care. 🌱",
+		"You will completely recover from a chronic illness. 🌈",
+		"You will learn a new yoga or meditation technique that will calm you. 🧘",
+		"You will lose a significant amount of weight by adopting a healthy lifestyle. ⚖️",
+		"You will find a motivating coach who will help you achieve your health goals. 💪",
+		"You will discover a natural remedy that will work wonders for you. 🌿",
+		"Your body will respond positively to a natural remedy. ✨",
+		"You will start a new fitness routine that you will enjoy. 🏃‍♀️",
+		"You will incorporate more fresh fruits and vegetables into your diet. 🥗",
+		"You will start getting enough sleep and feel more energetic. 😴",
+		"You will practice meditation or yoga to reduce stress. 🌸",
+		"You will work with a therapist for your mental health. 🗣️",
+		"You will develop a positive mindset and attitude towards life. ☀️",
+		"You will find a balance between work and relaxation. ⚖️",
+		"You will learn to manage stress effectively. 🌊",
+		"You will develop a healthy sleep routine. 🌙",
+		"You will discover a new hobby that will help you relax and de-stress. 🎨",
+		"You will find a workout routine that you enjoy and stick to. 🔄",
+		"You will make healthier food choices and avoid processed foods. 🥦",
+		"You will start drinking more water to stay hydrated. 💧",
+		"You will find a workout buddy to motivate you. 🤝",
+		"You will set realistic health goals and work towards achieving them. 📅"
+      ],
+	  "Home and Family": [
+		"A family gathering is on the horizon; cherish the moments. 🏠",
+		"Your home will become a sanctuary of peace and comfort. 🌈",
+		"A small project at home will bring you joy and satisfaction. 🛠️",
+		"Spend quality time with loved ones; it's time well spent. ❤️",
+		"You will start a new home improvement project. 🏡",
+		"A strong bond will develop between members of your family. 👨‍👩‍👧‍👦",
+		"You will adopt a pet that will bring you great joy. 🐾",
+		"A family member will celebrate a significant life event. 🎉",
+		"You will add a new room or space to your home. 🛌",
+		"You will beautify your home garden. 🌻"
+      ],
+	  "Travel and Adventure": [
+		"An unexpected journey may lead to wonderful experiences. ✈️",
+		"Travel plans are in your future; pack your bags! 🧳",
+		"Exploring new cultures will expand your horizons. 🌍",
+		"Adventure awaits; embrace spontaneity and new experiences. 🌟",
+		"You will go on a dream vacation that will change your life. 🌅",
+		"You will embark on a dangerous adventure. ⚔️",
+		"You will live in a new country and experience a new culture. 🇺🇸",
+		"You will go on a road trip and explore many new places. 🚗",
+		"You will experience an adventurous sport or activity. 🧗‍♂️",
+		"You will go on a dream vacation and relax. 🏖️"
+      ],
+      "Spirituality and Growth": [
+		"A new spiritual practice will enrich your life. 🕊️",
+		"Self-reflection is key; take time to understand your true self. 🌌",
+		"Embrace change; it will lead you to personal growth. 🌱",
+		"You will experience a deep sense of inner peace and tranquility. 🧘‍♀️",
+		"You will connect with your higher self and discover your purpose. 🔮",
+		"You will learn to trust your intuition and follow your heart. ❤️‍🔥",
+		"You will find a spiritual mentor who will guide you on your journey. 🧑‍⚖️",
+		"You will have a spiritual awakening that will change your life. ✨",
+		"You will develop a strong connection with nature. 🌳",
+		"You will learn to live in the present moment and appreciate the simple things in life. 🌼"
+	  ],
+      "Education and Learning": [
+		"A new opportunity for learning will present itself; embrace it. 📚",
+		"Pursuing a new skill will bring you fulfillment. ✏️",
+		"Your thirst for knowledge will lead to exciting discoveries. 🔍",
+		"You will excel in your studies and achieve academic success. 🎓",
+		"You will have the opportunity to study abroad and experience a new culture. 🌏",
+		"You will meet a mentor who will inspire you to reach your full potential. 🌟",
+		"You will discover a hidden talent or passion for learning. 💡",
+		"You will participate in a workshop or seminar that will expand your knowledge. 📅",
+		"You will graduate with honors and achieve your academic goals. 🏆",
+		"You will be accepted into a prestigious university or program. 🎓",
+		"You will develop a lifelong love of learning. ❤️",
+		"You will become a mentor to others and share your knowledge. 🌱",
+		"You will overcome academic challenges and emerge stronger. 💪",
+		"You will inspire others to pursue their own educational goals. 🌈",
+		"You will discover a new passion for learning that will change your life. ✨",
+		"You will develop a strong work ethic and dedication to your studies. 📖",
+		"You will learn how to think critically and solve problems effectively. 🔍",
+		"You will build a strong network of connections through your education. 🌐"
+      ],
+      "Creativity and Expression": [
+		"An artistic endeavor will bring you joy and satisfaction. 🎨",
+		"Allow your creativity to flow; it's a great time to express yourself. 🎭",
+		"Collaborating with others will spark new ideas. 🤝",
+		"You will discover a hidden talent for creativity. 🌈",
+		"You will create something beautiful and meaningful. 🌸",
+		"You will overcome your fear of failure and express yourself freely. 🌟",
+		"You will find a creative outlet that brings you peace and joy. 🎉",
+		"You will inspire others with your creativity. ✨",
+		"You will develop a unique artistic style. 🖌️",
+		"You will participate in a creative project that you are passionate about. 🎭"
+	  ],
+      "Friendships and Connections": [
+		"A new friendship will blossom; be open to new connections. 👭",
+		"Nurture your existing friendships; they bring you joy. 💞",
+		"Reconnecting with an old friend will bring nostalgia and happiness. 📞",
+		"You will meet a new friend who will become a lifelong companion. 👫",
+		"You will help a friend through a difficult time and strengthen your bond. 💪",
+		"You will create lasting memories with your friends. 📸",
+		"You will be there for your friends when they need you most. 🤗",
+		"You will find a group of like-minded people who share your interests. 🌟",
+		"You will inspire and motivate your friends to achieve their goals. 🚀",
+		"You will be surrounded by supportive and loving friends. ❤️"
+	  ],
+      "Personal Development and Goals": [
+		"Setting clear goals will lead to personal growth and success. 📈",
+		"A change in perspective will help you achieve your aspirations. 🔄",
+		"Don’t be afraid to take risks; they may lead to great rewards. 🎯",
+		"You will discover your true passions and purpose in life. 🌈",
+		"You will develop a growth mindset and believe in your abilities. 🌱",
+		"You will overcome challenges and obstacles with resilience. 💪",
+		"You will learn to manage stress effectively and maintain a positive outlook. 🌟",
+		"You will develop self-confidence and believe in your abilities. ❤️",
+		"You will achieve a long-held goal that will bring you great satisfaction. 🎉",
+		"You will become a more compassionate and understanding person. 🤝"
+	  ]
+    };
+
+    const fortunesHindi = [
+      "एक नया अवसर आपके रास्ते में आ रहा है, लेकिन आपको अपने कम्फर्ट ज़ोन से बाहर निकलना होगा। 🚀",
+	  "आपकी वित्तीय स्थिति सुधार रही है, लेकिन खर्च पर ध्यान दें। 💰",
+	  "एक पदोन्नति या वेतन वृद्धि आपके भविष्य में है, लेकिन कड़ी मेहनत करना जारी रखें। 📈",
+      "एक चुनौतीपूर्ण परियोजना आपके रास्ते में आ रही है, लेकिन यह एक मूल्यवान सीखने का अनुभव होगा। 📚",
+      "आपका करियर पथ विकसित हो रहा है, नए अवसरों के लिए खुले रहें। 🌟",
+      "एक वित्तीय लाभ आपके क्षितिज पर है, लेकिन इसे समझदारी से प्रबंधित करने के लिए तैयार रहें। 💼",
+      "आपके करियर की दिशा में बदलाव आ रहा है, लेकिन यह अधिक संतोषजनक होगा। 🔄",
+      "आपकी वित्तीय स्थिरता सुधार रही है, लेकिन संतुष्ट न हों। 📊",
+      "एक नया व्यापारिक उद्यम संभावना है, लेकिन कदम उठाने से पहले अपना शोध करें। 🕵️‍♂️",
+      "एक सलाहकार या मार्गदर्शक आपके पेशेवर जीवन में प्रवेश कर रहा है, उनकी सलाह के लिए खुले रहें। 🤝",
+      "एक नया प्यार आपके जीवन में आ रहा है, लेकिन अप्रत्याशित कनेक्शनों के लिए खुले रहें। ❤️",
+      "आपका वर्तमान रिश्ता गहरा हो रहा है, लेकिन संचार महत्वपूर्ण है। 💬",
+      "एक पिछला रिश्ता अभी भी आपको प्रभावित कर रहा है, इसे जाने दें और आगे बढ़ें। ⏳",
+      "आपका जीवनसाथी आपके पास से अधिक निकट है, अपना दिल खुला रखें। 💖",
+	  "आपके रिश्ते में एक चुनौती आ रही है, लेकिन यह आपके बंधन को मजबूत करेगी। 💪",
+	  "आपका प्रेम जीवन खिल रहा है, इस विशेष समय का आनंद लें। 🌹",
+   	  "आपके प्रेम जीवन में उपचार और आत्मनिरीक्षण का समय आ रहा है। 🧘‍♀️",
+	  "आपका रिश्ता विकसित हो रहा है, बदलाव के लिए खुले रहें। 🔄",
+	  "एक दीर्घकालिक प्रतिबद्धता क्षितिज पर है, लेकिन सुनिश्चित करें कि आप तैयार हैं। 💍",
+	  "आपका प्रेम जीवन आपके आत्म-प्रेम का प्रतिबिंब है, व्यक्तिगत विकास पर ध्यान दें। 🌱",
+	  "आपका स्वास्थ्य सुधार रहा है, लेकिन आत्म-देखभाल को प्राथमिकता देना जारी रखें। 🏃‍♂️",
+      "एक स्वास्थ्य समस्या हल हो रही है, लेकिन अपनी भलाई की उपेक्षा न करें। 🚑",
+      "आपका शरीर संतुलन चाहता है, व्यायाम और स्वस्थ भोजन को अपनी दिनचर्या में शामिल करें। 🥗",
+      "तनाव का एक दौर आ रहा है, लेकिन आपके पास सामना करने के लिए उपकरण हैं। 🛠️",
+      "आपका मानसिक स्वास्थ्य सुधार रहा है, आत्म-देखभाल को प्राथमिकता देना जारी रखें। 🧠",
+      "एक नया कल्याण अभ्यास आपको बुला रहा है, इसे अन्वेषण करें। 🔮",
+      "आपके ऊर्जा स्तर बढ़ रहे हैं, इस बढ़ावा का लाभ उठाएं। ⚡",
+      "आपका शरीर संतुलन चाहता है, सुनिश्चित करें कि आपको पर्याप्त आराम मिल रहा है। 💤",
+      "एक स्वास्थ्य चुनौती आपके रास्ते में आ रही है, लेकिन यह अस्थायी होगी। ⏳",
+      "आपकी समग्र भलाई सुधार रही है, अपनी प्रगति का जश्न मनाएं। 🎉",
+      "आपके घर के पर्यावरण को ताज़ा करने की आवश्यकता है, अव्यवस्था को कम करें या सजाएं। 🏡",
+      "आपके परिवार में एक नया सदस्य आ रहा है, एक खुशी के समय के लिए तैयार रहें। 👶",
+      "एक परिवार का सदस्य आपका समर्थन चाहता है, उनके लिए वहां रहें। 🤗",
+      "आपका घर आराम और शांति का स्रोत है, इसे एक अभयारण्य बनाएं। 🕊️",
+      "एक पारिवारिक विवाद हल हो रहा है, लेकिन संचार महत्वपूर्ण है। 🗣️",
+      "आपके पारिवारिक रिश्ते मजबूत हो रहे हैं, इन बंधनों को पोषित करें। 🤝",
+      "निवास का एक परिवर्तन आ रहा है, लेकिन यह सबसे अच्छा होगा। 🏠",
+      "आपका घर आपके आंतरिक अवस्था का प्रतिबिंब है, एक सकारात्मक वातावरण बनाने पर ध्यान दें। 🌈",
+      "एक परिवार का सदस्य कठिन समय से गुजर रहा है, अपना समर्थन दें। 🙏",
+      "आपका घर उपचार और नवीकरण का स्थान है, वहां समय बिताएं। 🛋️",
+      "एक सहज यात्रा आपके रास्ते में आ रही है, साहस को गले लगाएं। ✈️",
+      "आपकी भ्रमण की इच्छा पुकार रही है, एक नए गंतव्य की योजना बनाएं। 🌍",
+      "एक यात्रा साहस आपके रास्ते में आ रहा है, लेकिन अप्रत्याशित चुनौतियों के लिए तैयार रहें। ⚠️",
+      "आपकी यात्राएं आपके क्षितिज का विस्तार कर रही हैं, अन्वेषण करना जारी रखें। 🌅",
+      "एक सपना छुट्टी आपके पहुंच के भीतर है, योजना बनाना शुरू करें। 🌴",
+      "आपकी यात्राएं आपको अपने करीब ला रही हैं, यात्रा का आनंद लें। 🚗",
+      "एक यात्रा साथी आपके जीवन में आ रहा है, साहस का आनंद लें। 👥",
+      "आपकी यात्राएं आपको प्रेरित कर रही हैं, अपने अनुभवों को घर लाएं। 🏡",
+      "एक यात्रा चुनौती आपके रास्ते में आ रही है, लेकिन यह पुरस्कृत होगा। 🎁",
+      "आपकी यात्राएं आपके दृष्टिकोण को आकार दे रही हैं, अन्वेषण करना जारी रखें। 🧭",
+      "आपका आध्यात्मिक विकास तेज हो रहा है, नए अभ्यासों या विश्वासों का अन्वेषण करें। 🌌",
+      "एक आध्यात्मिक गुरु या मार्गदर्शक आपके जीवन में आ रहा है, उनकी बुद्धि के लिए खुले रहें। 🧙‍♂️",
+      "आपकी आध्यात्मिक यात्रा आपको एक गहरे उद्देश्य की ओर ले जा रही है। 🕊️",
+      "एक आध्यात्मिक जागृति आ रही है, परिवर्तन को गले लगाएं। 🌅",
+      "आपके आध्यात्मिक विश्वास विकसित हो रहे हैं, अपने अंतर्ज्ञान पर भरोसा करें। 🔮",
+      "एक आध्यात्मिक रिट्रीट या तीर्थयात्रा आपको बुला रही है, कॉल का उत्तर दें। 🏞️",
+      "ब्रह्मांड के साथ आपका आध्यात्मिक संबंध गहरा हो रहा है, प्रेम और समर्थन महसूस करें। 🌌",
+      "एक आध्यात्मिक चुनौती आपके रास्ते में आ रही है, लेकिन यह आपके विश्वास को मजबूत करेगी। 💪",
+      "आपकी आध्यात्मिक यात्रा आपको शांति और शांति के स्थान पर ले जा रही है। ☮️",
+      "आपके आध्यात्मिक विश्वास आपको दुनिया पर सकारात्मक प्रभाव डालने के लिए प्रेरित कर रहे हैं। 🌎",
+      "एक नया सीखने का अवसर आपके रास्ते में आ रहा है, इसका लाभ उठाएं। 📖",
+      "ज्ञान के लिए आपकी प्यास बढ़ रही है, सीखना और बढ़ना जारी रखें। 💡",
+      "एक नया कौशल या प्रतिभा खोजी जाने की प्रतीक्षा कर रहा है, अपनी रुचियों का अन्वेषण करें। 🎨",
+      "आपकी शिक्षा का भुगतान हो रहा है, उत्कृष्टता के लिए प्रयास करना जारी रखें। 🎓",
+      "आपके अध्ययन में एक चुनौती आ रही है, लेकिन आपके पास इसे दूर करने की क्षमता है। 🏆",
+      "आपकी शिक्षा शैली विकसित हो रही है, नए तरीकों के लिए अनुकूल बनें। 🔄",
+      "एक संरक्षक या शिक्षक आपके जीवन में आ रहा है, उनके मार्गदर्शन के लिए खुले रहें। 👩‍🏫",
+      "आपकी शिक्षा आपको एक उज्ज्वल भविष्य के लिए तैयार कर रही है, कड़ी मेहनत करना जारी रखें। 🌟",
+      "एक नया शैक्षिक अवसर आपके रास्ते में आ रहा है, लेकिन इसके लिए समर्पण की आवश्यकता होगी। 📚"
+    ];
+
+    const suspenseMessages = [
+      "🧙‍♂️ Reading the stars... ✨",
+      "🔮 Gazing into the crystal ball... 👁️‍🗨️",
+      "🃏 Shuffling the cards of fate... ♠️",
+      "📜 Consulting the ancient scrolls... 🧾",
+      "🔭 Observing distant galaxies... 🌌",
+      "🔮 Whispering to the winds of fate... 🌬️",
+    ];
+
+    languageSelect.addEventListener("change", () => {
+      if (languageSelect.value === "en") {
+        topicSelection.classList.remove("hidden");
+      } else {
+        topicSelection.classList.add("hidden");
+      }
+    });
+
+    fortuneBtn.addEventListener("click", () => {
+      const firstLetter = firstLetterInput.value.trim();
+      const language = languageSelect.value; // Get selected language
+
+      // Error handling
+      if (!firstLetter || firstLetter.length !== 1 || !/^[A-Za-z]$/.test(firstLetter)) {
+        errorMessage.textContent = "Kya kar rhe ho yrrr!🤡";
+        errorMessage.classList.remove("hidden");
+        return;
+      }
+
+      if (language === "en" && (!topicOne.value || !topicTwo.value)) {
+        errorMessage.textContent = "Kya kar rhe ho yrrr!🤡";
+        errorMessage.classList.remove("hidden");
+        return;
+      }
+
+      errorMessage.classList.add("hidden");
+      animation.classList.remove("hidden");
+      fortuneDisplay.classList.add("hidden");
+      progressBar.style.width = '0%';
+      progressBar.offsetWidth; // trigger reflow
+      progressBar.style.transitionDuration = `${progressBarDuration}ms`; // Set duration
+      progressBar.style.width = '100%'; // Fill progress bar
+
+      // Start suspense messages
+      let suspenseIndex = 0;
+      const suspenseText = document.getElementById("suspenseText");
+
+      const showSuspenseMessage = () => {
+        if (suspenseIndex < suspenseMessages.length) {
+          suspenseText.textContent = suspenseMessages[suspenseIndex];
+          suspenseIndex++;
+          setTimeout(showSuspenseMessage, suspenseDuration); // Change message every suspenseDuration milliseconds
+        } else {
+          setTimeout(() => {
+            animation.classList.add("hidden");
+            fortuneDisplay.classList.remove("hidden");
+            fortuneDisplay.classList.add("show");
+
+            if (language === "en") {
+              // Display a random fortune in English
+              const fortune1 = fortunes[topicOne.value][Math.floor(Math.random() * fortunes[topicOne.value].length)];
+              const fortune2 = fortunes[topicTwo.value][Math.floor(Math.random() * fortunes[topicTwo.value].length)];
+              fortuneText.innerHTML = `<span class="colorful-text">${topicOne.value}:</span> ${fortune1}<br><span class="colorful-text">${topicTwo.value}:</span> ${fortune2}`;
+            } else {
+              // Display a random fortune in Hindi
+              const fortuneHindi = fortunesHindi[Math.floor(Math.random() * fortunesHindi.length)];
+              fortuneText.innerHTML = fortuneHindi;
+            }
+          }, fortuneDisplayDelay); // Delay before showing the fortune
+        }
+      };
+
+      setTimeout(() => {
+        showSuspenseMessage();
+      }, progressBarDuration); // Match this time with the progress bar duration
+    });
+	// Add this part at the end of your existing script
+
+	const copyFortuneBtn = document.getElementById("copyFortune");
+
+	copyFortuneBtn.addEventListener("click", () => {
+	  const textToCopy = fortuneText.innerText; // Get the fortune text
+
+      navigator.clipboard.writeText(textToCopy)
+        .then(() => {
+		  alert("Fortune copied to clipboard! 📋");
+		})
+		.catch(err => {
+		  console.error("Failed to copy: ", err);
+		  alert("Failed to copy fortune.");
+	    });
+	});
+  </script>
+</body>
+</html>
